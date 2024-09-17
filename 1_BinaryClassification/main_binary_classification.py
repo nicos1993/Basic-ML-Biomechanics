@@ -6,6 +6,7 @@
 # Label = [0, 1] -> ['comfortable speed', 'fast speed']
 
 import os
+import sys
 import glob
 import pandas as pd
 import numpy as np
@@ -19,9 +20,15 @@ from utilityFunctions import *
 import matplotlib.pyplot as plt
 import seaborn as sb
 
-# Set the folder path to where the data is located
-# Check if the folder exists, if not return a useful error message
+# Set the folder path to where the data is located; change accordingly
+# Fukuchi et al. (2018) data can be accessed here: https://doi.org/10.6084/m9.figshare.5722711
 dataFolder = "C:\\Users\\Nicos\\Documents\\WalkingRunning_Data\\Walking"
+
+# Check if the data folder exists, if not return a useful error message
+if not os.path.isdir(dataFolder):
+    print(f"The current data folder directory {dataFolder} does not exist.")
+    print(f"Set the 'dataFolder' variable to the correct folder.")
+    sys.exit()
 
 # Grab the names of all the files
 files = os.listdir(dataFolder)
@@ -136,6 +143,6 @@ plt.show()
 
 plt.figure()
 plt.plot(epoch_losses)
-plt.xlabel("Epochs")
-plt.ylabel("Loss")
+plt.xlabel("Epochs",fontweight='bold',fontsize=16)
+plt.ylabel("Loss",fontweight='bold',fontsize=16)
 plt.show()

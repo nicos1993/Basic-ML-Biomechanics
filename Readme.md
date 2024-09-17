@@ -1,7 +1,7 @@
 # Basic-ML-Biomechanics - Nicos Haralabidis
 
 ## Project Goal
-The goal of this project is to apply basic machine learning approaches, relying on Pytorch and Scikit-Learn, to open-source biomechanical datasets (e.g., Fukuchi et al., 2018) 
+The goal of this project is to apply basic machine learning approaches, relying on Pytorch and Scikit-Learn, to open-source biomechanical datasets (e.g., Fukuchi et al., 2018). 
   
 ## Installation Instructions (tested on Windows OS)
 To get started create a conda environment using the `environment.yml` in the base directory:  
