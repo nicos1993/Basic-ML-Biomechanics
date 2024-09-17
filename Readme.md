@@ -1,7 +1,7 @@
 # Basic-ML-Biomechanics - Nicos Haralabidis
 
 ## Project Goals
-
+The goals of this project are 
 ## Installation Instructions (tested on Windows OS)
 To get started create a conda environment using the `environment.yml` in the base directory:  
 `conda env create -f environment.yml`  
