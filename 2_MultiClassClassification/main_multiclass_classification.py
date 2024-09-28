@@ -80,15 +80,69 @@ X_train = np.delete(X_train,valid_file_ints,axis=0)
 y_valid = y_train[valid_file_ints,:]
 y_train = np.delete(y_train,valid_file_ints,axis=0)
 
-training_data = CustomDataset(labels_file=y_train,features_file=X_train)
-testing_data  = CustomDataset(labels_file=y_test,features_file=X_test)
+training_data   = CustomDataset(labels_file=y_train,features_file=X_train)
+validation_data = CustomDataset(labels_file=y_valid,features_file=X_valid)
+testing_data    = CustomDataset(labels_file=y_test,features_file=X_test)
 
-train_dataloader = DataLoader(training_data, batch_size=64, shuffle=True)
-test_dataloader = DataLoader(testing_data, batch_size=64, shuffle=True)
+train_dataloader      = DataLoader(training_data, batch_size=64, shuffle=True)
+validation_dataloader = DataLoader(validation_data, batch_size=64, shuffle=True)
+test_dataloader       = DataLoader(testing_data, batch_size=64, shuffle=True)
 
-# Define hyperparameters
+# Define input/output sizes
 input_size  = 3
 output_size = 3
-hidden_size = 16
 
-torch.manual_seed(42)
+# Define hyperparameters
+nodes_per_layer = [8, 12, 16, 8, 12, 16, 8, 12, 16]
+network_layers  = [2, 2, 2, 4, 4, 4, 8, 8, 8]
+n_params = np.size(nodes_per_layer)
+
+# Define loss function and optimizer
+criterion = nn.CrossEntropyLoss()
+
+# Define the number of training epochs
+num_epochs = 200
+
+# Define array to store loss at each epoch for different sets of hyperparameters
+epoch_losses = np.zeros((num_epochs,n_params))
+
+# Training/Validation loop
+for p in range(n_params):
+    torch.manual_seed(42)
+    # Create model
+    model = MultiClassModel_wParams(input_features=input_size, output_features=output_size,
+                                    nodes_per_layer=nodes_per_layer[p],
+                                    network_layers=network_layers[p])
+
+    optimizer = optim.Adam(model.parameters(), lr=0.001)
+
+    for epoch in range(num_epochs):
+        model.train() # Set the model to training mode
+        running_loss = 0
+
+        for inputs, labels in train_dataloader:
+            # Zero the gradients
+            optimizer.zero_grad()
+
+            # Forward pass
+            outputs = model(inputs)
+
+            # Compute loss
+            loss = criterion(outputs, labels.squeeze())
+
+            # Backward pass and optimization
+            loss.backward()
+            optimizer.step()
+
+            # Update the running loss
+            running_loss += loss.item() * inputs.size(0)
+
+            # Calculate average training loss for the epoch
+            epoch_loss = running_loss / len(train_dataloader.dataset)
+
+            print(f"Epoch [{epoch + 1}/{num_epochs}], Loss: {epoch_loss: .4f},"
+                  f" Nodes: {nodes_per_layer[p]}, Layers: {network_layers[p]}")
+
+        # Store losses from each epoch and parameter set
+        epoch_losses[epoch, p] = epoch_loss
+

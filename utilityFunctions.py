@@ -40,6 +40,29 @@ class MultiClassModel(nn.Module):
    def forward(self, x):
       return self.linear_layer_stack(x)
 
+class MultiClassModel_wParams(nn.Module):
+   def __init__(self, input_features, output_features, nodes_per_layer=8, network_layers=2):
+      super().__init__()
+
+      layers = []
+
+      # Define the first layer; input -> first layer
+      layers.append(nn.Linear(in_features=input_features, out_features=nodes_per_layer))
+      layers.append(nn.ReLU())
+
+      # Include the network layers
+      for _ in range(network_layers-1):
+         layers.append(nn.Linear(in_features=nodes_per_layer,out_features=nodes_per_layer))
+         layers.append(nn.ReLU())
+
+      # Define the output later; last layer -> output
+      layers.append(nn.Linear(in_features=nodes_per_layer,out_features=output_features))
+
+      self.linear_layer_stack = nn.Sequential(*layers)
+
+   def forward(self, x):
+      return self.linear_layer_stack(x)
+
 def extractData(files):
    # Predefine arrays for the feature variables
    hip_array = np.zeros((101, len(files)))
