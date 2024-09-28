@@ -49,6 +49,7 @@ F_data = extractData(F_files)
 C_labels = np.ones((len(C_files),1))*0
 F_labels = np.ones((len(F_files),1))*1
 
+# Find NANs and remove
 C_data, C_labels = checkDataArray(C_data,C_labels)
 F_data, F_labels = checkDataArray(F_data,F_labels)
 

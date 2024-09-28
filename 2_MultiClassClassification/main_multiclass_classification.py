@@ -40,3 +40,55 @@ F_files = glob.glob(os.path.join(dataFolder,"WBDS*walkOFang.txt"))
 # Slow walking speed
 S_files = glob.glob(os.path.join(dataFolder,"WBDS*walkOSang.txt"))
 
+# Extract the flexion-extension joint angles, calculate range of motion
+C_data = extractData(C_files)
+F_data = extractData(F_files)
+S_data = extractData(S_files)
+
+# Create classification labels
+C_labels = np.ones((len(C_files),1))*0
+F_labels = np.ones((len(F_files),1))*1
+S_labels = np.ones((len(S_files),1))*2
+
+# Find NANs and remove
+C_data, C_labels = checkDataArray(C_data,C_labels)
+F_data, F_labels = checkDataArray(F_data,F_labels)
+S_data, S_labels = checkDataArray(S_data,S_labels)
+
+# Merge the data and labels, vertically
+data   = np.vstack((C_data,F_data,S_data))
+labels = np.vstack((C_labels,F_labels,S_labels))
+
+# Normalize each of the input features based on the maximum contained ranges
+data_norm = data / np.max(data,axis=0)
+
+# Downcast to be compatible with Pytorch
+data_norm = torch.from_numpy(data_norm).type(torch.float32)
+labels    = torch.from_numpy(labels).type(torch.long)
+
+# Split data into train and test sets
+# Test data 15% of entire data
+# Random state set for reproducibility purposes
+X_train, X_test, y_train, y_test = train_test_split(data_norm,labels,test_size=0.15,random_state=42)
+
+# Generate a validation testing set from the training set
+n_valid_files = np.int32(np.round(X_train.size(dim=0)*0.15)) # 15% of the training set
+np.random.seed(1)
+valid_file_ints = np.random.randint(0,X_train.size(dim=0),n_valid_files)
+X_valid = X_train[valid_file_ints,:]
+X_train = np.delete(X_train,valid_file_ints,axis=0)
+y_valid = y_train[valid_file_ints,:]
+y_train = np.delete(y_train,valid_file_ints,axis=0)
+
+training_data = CustomDataset(labels_file=y_train,features_file=X_train)
+testing_data  = CustomDataset(labels_file=y_test,features_file=X_test)
+
+train_dataloader = DataLoader(training_data, batch_size=64, shuffle=True)
+test_dataloader = DataLoader(testing_data, batch_size=64, shuffle=True)
+
+# Define hyperparameters
+input_size  = 3
+output_size = 3
+hidden_size = 16
+
+torch.manual_seed(42)
