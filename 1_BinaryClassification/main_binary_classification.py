@@ -41,6 +41,7 @@ C_files = glob.glob(os.path.join(dataFolder,"WBDS*walkOCang.txt"))
 # Fast walking speed
 F_files = glob.glob(os.path.join(dataFolder,"WBDS*walkOFang.txt"))
 
+# Extract the flexion-extension joint angles, calculate range of motion
 C_data = extractData(C_files)
 F_data = extractData(F_files)
 
