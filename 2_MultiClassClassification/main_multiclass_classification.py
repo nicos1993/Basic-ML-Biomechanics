@@ -101,7 +101,7 @@ n_params = np.size(nodes_per_layer)
 criterion = nn.CrossEntropyLoss()
 
 # Define the number of training epochs
-num_epochs = 200
+num_epochs = 300
 
 # Define array to store loss at each epoch for different sets of hyperparameters
 epoch_losses = np.zeros((num_epochs,n_params))
@@ -146,3 +146,8 @@ for p in range(n_params):
         # Store losses from each epoch and parameter set
         epoch_losses[epoch, p] = epoch_loss
 
+plt.figure()
+plt.plot(np.arange(0,num_epochs,10),epoch_losses[0::10,:])
+plt.xlabel("Epochs",fontweight='bold',fontsize=16)
+plt.ylabel("Loss",fontweight='bold',fontsize=16)
+plt.show()
