@@ -12,6 +12,7 @@ import pandas as pd
 import numpy as np
 import torch
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 
 # Set the folder path to where the data is located; change accordingly
 dataFolder = "C:\\Users\\Nicos\\Documents\\FHSD_Data"
@@ -50,6 +51,17 @@ data_np = torch.from_numpy(data_np).type(torch.float32)
 # Separate data into features and outcome
 data_X = data_np[:,:-1]
 data_y = data_np[:,-1]
+
+X_train, X_test, y_train, y_test = train_test_split(data_X, data_y, test_size=0.15, random_state=42)
+
+scaler_train_X = StandardScaler()
+scaler_train_y = StandardScaler()
+
+scaler_train_X.fit(X_train)
+scaler_train_y.fit(y_train.reshape(-1,1))
+
+norm_X_train = scaler_train_X.transform(X_train)
+norm_y_train = scaler_train_y.transform(y_train.reshape(-1,1))
 
 print('break point')
 
