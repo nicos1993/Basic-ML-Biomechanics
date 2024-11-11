@@ -10,6 +10,8 @@ import os
 import sys
 import pandas as pd
 import numpy as np
+import torch
+from sklearn.model_selection import train_test_split
 
 # Set the folder path to where the data is located; change accordingly
 dataFolder = "C:\\Users\\Nicos\\Documents\\FHSD_Data"
@@ -41,6 +43,13 @@ data = data[features]
 
 # Convert from data frame object to numpy array
 data_np = data.to_numpy()
+
+# Downcast the data to be compatible with PyTorch
+data_np = torch.from_numpy(data_np).type(torch.float32)
+
+# Separate data into features and outcome
+data_X = data_np[:,:-1]
+data_y = data_np[:,-1]
 
 print('break point')
 
