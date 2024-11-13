@@ -14,8 +14,9 @@ import torch
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
-# Set the folder path to where the data is located; change accordingly
+# Set the folder path to where the data is located; change accordingly {Link the data directly from online source. I'm using codespaces}
 dataFolder = "C:\\Users\\Nicos\\Documents\\FHSD_Data"
+
 
 # Data file
 dataFile = "video_features.csv"
