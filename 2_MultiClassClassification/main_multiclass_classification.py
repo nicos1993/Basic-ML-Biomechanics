@@ -18,6 +18,7 @@ import seaborn as sb
 
 # Set the folder path to where the data is located; change accordingly
 # Fukuchi et al. (2018) data can be accessed here: https://doi.org/10.6084/m9.figshare.5722711
+# Is it possible to link data from online source remotely?
 dataFolder = "C:\\Users\\Nicos\\Documents\\WalkingRunning_Data\\Walking"
 
 # Check if the data folder exists, if not return a useful error message
