@@ -8,14 +8,11 @@
 
 import os
 import sys
-import pandas as pd
-import numpy as np
-import torch
-import torch.nn as nn
 from torch.utils.data import DataLoader
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
 from utilityFunctions import *
+import matplotlib.pyplot as plt
+
 
 # Set the folder path to where the data is located; change accordingly
 dataFolder = "C:\\Users\\Nicos\\Documents\\FHSD_Data"
@@ -68,23 +65,104 @@ y_train_norm = (y_train - y_mean) / y_std
 X_test_norm = (X_test - X_mean) / X_std
 y_test_norm = (y_test - y_mean) / y_std
 
-training_data = CustomDataset(labels_file=y_train_norm, features_file=X_train_norm)
+# Setup K-fold validation
+k = 4
+num_val_samples = len(X_train) // k
+num_epochs = 200
+all_scores = []
 
-training_dataloader = DataLoader(training_data, batch_size=8, shuffle=True)
+n_inputs = data_X.size(dim=1)
+# Define model
+def init_nn_model(n_inputs):
 
-# layers = []
-#
-# layers.append(nn.Linear(4,2))
-# layers.append(nn.ReLU())
-#
-# print(layers)
-#
-# print(*layers)
-# model = nn.Sequential()
+    nn_model = nn.Sequential(
+        nn.Linear(n_inputs, 32),
+        nn.ReLU(),
+        nn.Linear(32, 32),
+        nn.ReLU(),
+        nn.Linear(32, 1)
+    )
 
-for inputs, labels in training_dataloader:
-    print(labels)
+    return nn_model
 
+# Loss function: Mean Square Error
+loss = nn.MSELoss()
+
+epoch_fold_losses = np.zeros((num_epochs,k))
+epoch_fold_losses_val = np.zeros((num_epochs,k))
+epoch_fold_losses_val_MAE = np.zeros((num_epochs,k))
+
+for i in range(k):
+    print('processing fold #', i)
+    val_data = X_train_norm[i * num_val_samples: (i + 1) * num_val_samples]
+    val_y    = y_train_norm[i * num_val_samples: (i + 1) * num_val_samples]
+    print('indices to: ', i * num_val_samples, ' and from: ', (i + 1) * num_val_samples)
+
+    partial_train_data = np.concatenate(
+        [X_train_norm[:i * num_val_samples],
+         X_train_norm[(i + 1) * num_val_samples:]],
+        axis=0)
+
+    partial_y_data = np.concatenate(
+        [y_train_norm[:i * num_val_samples],
+         y_train_norm[(i + 1) * num_val_samples:]],
+        axis=0)
+
+    training_data = CustomDataset(labels_file=partial_y_data, features_file=partial_train_data)
+    training_dataloader = DataLoader(training_data, batch_size=1, shuffle=True)
+
+    torch.manual_seed(42)
+
+    # Initialize model
+    nn_model = init_nn_model(n_inputs)
+
+    # Define optimizer and learning rate
+    optimizer = torch.optim.SGD(nn_model.parameters(), lr=0.01)
+
+    for epoch in range(num_epochs):
+        nn_model.train()
+        running_loss = 0
+
+        for inputs, output in training_dataloader:
+            # Zero the gradients
+            optimizer.zero_grad()
+
+            # Forward pass
+            model_output = nn_model(inputs)
+
+            # Compute loss
+            loss_ = loss(model_output.squeeze(dim=0),output)
+
+            # Backward pass and optimization
+            loss_.backward()
+            optimizer.step()
+
+            # Update the running loss
+            running_loss += loss_.item()
+
+        print(f"K-fold [{i + 1}, Epoch [{epoch + 1}/{num_epochs}], "
+              f"Loss: [{running_loss}]")
+
+        epoch_fold_losses[epoch, i] = running_loss
+        epoch_fold_losses_val[epoch, i] = loss(nn_model(val_data).squeeze(dim=1),val_y).detach().numpy()
+        epoch_fold_losses_val_MAE[epoch, i] = np.mean(np.abs((
+                y_mean.detach().numpy()+y_std.detach().numpy()
+                *(nn_model(val_data).squeeze(dim=1)-val_y).detach().numpy())))
+
+    all_scores.append(loss(nn_model(val_data).squeeze(dim=1),val_y).detach().numpy())
+
+all_scores = np.array(all_scores)
+print(f"Scores from the K-folds: {all_scores}")
+print(f"Mean score from the K-folds: {all_scores.mean()}")
+
+# Calculate the mean per epoch MSE across all folds for validation data
+mean_epoch_val_MAE = epoch_fold_losses_val_MAE.mean(axis=1)
+
+plt.figure()
+plt.plot(range(1, len(mean_epoch_val_MAE) + 1), mean_epoch_val_MAE)
+plt.xlabel("Epochs",fontweight='bold',fontsize=16)
+plt.ylabel("Validation MSE",fontweight='bold',fontsize=16)
+plt.show()
 
 print('break point')
 
