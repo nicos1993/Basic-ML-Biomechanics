@@ -68,7 +68,7 @@ y_test_norm = (y_test - y_mean) / y_std
 # Setup K-fold validation
 k = 4
 num_val_samples = len(X_train) // k
-num_epochs = 200
+num_epochs = 1000
 all_scores = []
 
 n_inputs = data_X.size(dim=1)
@@ -76,9 +76,9 @@ n_inputs = data_X.size(dim=1)
 def init_nn_model(n_inputs):
 
     nn_model = nn.Sequential(
-        nn.Linear(n_inputs, 32),
+        nn.Linear(n_inputs, 64),
         nn.ReLU(),
-        nn.Linear(32, 32),
+        nn.Linear(64, 32),
         nn.ReLU(),
         nn.Linear(32, 1)
     )

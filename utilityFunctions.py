@@ -109,3 +109,14 @@ def accuracy_fn(y_true, y_pred):
     correct = torch.eq(y_true, y_pred).sum().item() # torch.eq() calculates where two tensors are equal
     acc = (correct / len(y_pred)) * 100
     return acc
+
+# Moving average, smooth curve
+def smooth_curve(points, factor=0.9):
+   smoothed_points = []
+   for point in points:
+      if smoothed_points:
+         previous = smoothed_points[-1]
+         smoothed_points.append(previous * factor + point * (1 - factor))
+      else:
+         smoothed_points.append(point)
+   return smoothed_points
