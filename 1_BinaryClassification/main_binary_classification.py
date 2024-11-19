@@ -90,7 +90,7 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 # Define the number of training epochs
-num_epochs = 200
+num_epochs = 500
 
 # Define array to store loss at each epoch
 epoch_losses = np.zeros((num_epochs,))
