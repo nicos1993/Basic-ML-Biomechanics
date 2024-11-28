@@ -40,6 +40,38 @@ class MultiClassModel(nn.Module):
    def forward(self, x):
       return self.linear_layer_stack(x)
 
+class AutoEncoder_wParams(nn.Module):
+   def __init__(self, input_size, latent_size):
+      super().__init__()
+
+      # Encoder
+      self.encoder = nn.Sequential(nn.Linear(input_size, 128),
+                                   nn.ReLU(),
+                                   nn.Linear(128, 64),
+                                   nn.ReLU(),
+                                   nn.Linear(64, 32),
+                                   nn.ReLU(),
+                                   nn.Linear(32, 16),
+                                   nn.ReLU(),
+                                   nn.Linear(16, latent_size)
+                                   )
+
+      # Decoder
+      self.decoder = nn.Sequential(nn.Linear(latent_size, 16),
+                                   nn.ReLU(),
+                                   nn.Linear(16, 32),
+                                   nn.ReLU(),
+                                   nn.Linear(32, 64),
+                                   nn.ReLU(),
+                                   nn.Linear(64, 128),
+                                   nn.ReLU(),
+                                   nn.Linear(128, input_size),
+                                   nn.Sigmoid()
+                                   )
+      def forward(self, x):
+         encoded = self.encoder(x)
+         decoded = self.decoder(encoded)
+         return decoded
 class MultiClassModel_wParams(nn.Module):
    def __init__(self, input_features, output_features, nodes_per_layer=8, network_layers=2):
       super().__init__()
